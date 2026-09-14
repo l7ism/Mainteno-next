@@ -72,6 +72,11 @@ fs.copyFileSync(
   'public/app.css'
 );
 
+fs.copyFileSync(
+  'app.js',
+  'public/app.js'
+);
+
 const manifest = {
   id: '/',
   name: 'Mainteno Next',
@@ -354,6 +359,7 @@ const shellFiles = [
   '/icon-192.png',
   '/icon-512.png',
   '/app.css?v=20260914p10',
+  '/app.js?v=20260914p10b',
   ...modules
 ];
 
