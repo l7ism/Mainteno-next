@@ -1,9 +1,4 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "builds": [
-    {
-      "src": "*.html",
-      "use": "@vercel/static"
-    }
-  ]
+  "buildCommand": "mkdir -p public && cp index.html public/index.html",
+  "outputDirectory": "public"
 }
