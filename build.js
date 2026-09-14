@@ -4,6 +4,22 @@ const zlib = require('zlib');
 fs.mkdirSync('public', { recursive: true });
 let html = fs.readFileSync('index.html', 'utf8');
 
+// Local application modules, loaded in this exact order by index.html.
+const localModules = [
+  '/js/core.js?v=20260914p11',
+  '/js/router.js?v=20260914p11',
+  '/js/reports.js?v=20260914p11',
+  '/js/dashboard-admin.js?v=20260914p11',
+  '/js/assets.js?v=20260914p11',
+  '/js/workorders.js?v=20260914p11',
+  '/js/planning.js?v=20260914p11',
+  '/js/requests.js?v=20260914p11',
+  '/js/inventory.js?v=20260914p11',
+  '/js/offline.js?v=20260914p11',
+  '/js/events.js?v=20260914p11',
+  '/app.js?v=20260914p11'
+];
+
 // Registre central des modules Mainteno.
 // Pour les prochains modules, une seule ligne sera à ajouter ici.
 const modules = [
@@ -75,6 +91,12 @@ fs.copyFileSync(
 fs.copyFileSync(
   'app.js',
   'public/app.js'
+);
+
+fs.cpSync(
+  'js',
+  'public/js',
+  { recursive: true }
 );
 
 const manifest = {
@@ -359,7 +381,7 @@ const shellFiles = [
   '/icon-192.png',
   '/icon-512.png',
   '/app.css?v=20260914p10',
-  '/app.js?v=20260914p10b',
+  ...localModules,
   ...modules
 ];
 
