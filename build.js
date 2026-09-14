@@ -9,7 +9,8 @@ const scripts = [
   '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-user-admin-ui?v=20260914"></script>',
   '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-asset-ui?v=20260914p5"></script>',
   '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-wo-ui?v=20260914p6"></script>',
-  '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-dashboard-ui?v=20260914p7"></script>'
+  '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-dashboard-ui?v=20260914p7"></script>',
+  '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-search-ui?v=20260914p8"></script>'
 ];
 
 for (const tag of scripts) {
@@ -211,6 +212,9 @@ const woUi =
 const dashboardUi =
   'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-dashboard-ui?v=20260914p7';
 
+const searchUi =
+  'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-search-ui?v=20260914p8';
+
 const sw = `
 const V=${JSON.stringify(version)};
 const P='mainteno-next-';
@@ -221,6 +225,7 @@ const U=${JSON.stringify(adminUi)};
 const X=${JSON.stringify(assetUi)};
 const W=${JSON.stringify(woUi)};
 const D=${JSON.stringify(dashboardUi)};
+const G=${JSON.stringify(searchUi)};
 
 const SHELL=[
   '/',
@@ -232,7 +237,8 @@ const SHELL=[
   U,
   X,
   W,
-  D
+  D,
+  G
 ];
 
 self.addEventListener('install',e=>
@@ -370,7 +376,7 @@ self.addEventListener('fetch',e=>{
     );
   }
 
-if(u.href===U || u.href===X || u.href===W || u.href===D){
+if(u.href===U || u.href===X || u.href===W || u.href===D || u.href===G){
 
   return e.respondWith(
     swr(q,A)
