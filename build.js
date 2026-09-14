@@ -4,21 +4,33 @@ const zlib = require('zlib');
 fs.mkdirSync('public', { recursive: true });
 let html = fs.readFileSync('index.html', 'utf8');
 
-const scripts = [
-  '<script src="/ux-forms.js?v=20260914"></script>',
-  '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-user-admin-ui?v=20260914"></script>',
-  '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-asset-ui?v=20260914p5"></script>',
-  '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-wo-ui?v=20260914p6"></script>',
-  '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-dashboard-ui?v=20260914p7"></script>',
-  '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-search-ui?v=20260914p8"></script>',
-  '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-stock-ui?v=20260914p9"></script>'
+// Registre central des modules Mainteno.
+// Pour les prochains modules, une seule ligne sera à ajouter ici.
+const modules = [
+  '/ux-forms.js?v=20260914',
+  'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-user-admin-ui?v=20260914',
+  'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-asset-ui?v=20260914p5',
+  'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-wo-ui?v=20260914p6',
+  'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-dashboard-ui?v=20260914p7',
+  'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-search-ui?v=20260914p8',
+  'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-stock-ui?v=20260914p9'
 ];
 
-for (const tag of scripts) {
+// Injecte automatiquement les modules avant le vrai </body>
+for (const src of modules) {
+  const tag = `<script src="${src}"></script>`;
+
   if (!html.includes(tag)) {
     const p = html.lastIndexOf('</body>');
-    if (p < 0) throw new Error('Closing </body> tag not found');
-    html = html.slice(0, p) + tag + html.slice(p);
+
+    if (p < 0) {
+      throw new Error('Closing </body> tag not found');
+    }
+
+    html =
+      html.slice(0, p) +
+      tag +
+      html.slice(p);
   }
 }
 
@@ -34,12 +46,26 @@ const pwaHead = [
 
 if (!html.includes('href="/manifest.webmanifest"')) {
   const p = html.indexOf('</head>');
-  if (p < 0) throw new Error('Closing </head> tag not found');
-  html = html.slice(0, p) + pwaHead + html.slice(p);
+
+  if (p < 0) {
+    throw new Error('Closing </head> tag not found');
+  }
+
+  html =
+    html.slice(0, p) +
+    pwaHead +
+    html.slice(p);
 }
 
-fs.writeFileSync('public/index.html', html);
-fs.copyFileSync('ux-forms.js', 'public/ux-forms.js');
+fs.writeFileSync(
+  'public/index.html',
+  html
+);
+
+fs.copyFileSync(
+  'ux-forms.js',
+  'public/ux-forms.js'
+);
 
 const manifest = {
   id: '/',
@@ -51,6 +77,7 @@ const manifest = {
   display: 'standalone',
   background_color: '#f3f4f6',
   theme_color: '#111827',
+
   icons: [
     {
       src: '/icon-192.png',
@@ -69,8 +96,17 @@ const manifest = {
 
 fs.writeFileSync(
   'public/manifest.webmanifest',
-  JSON.stringify(manifest, null, 2)
+  JSON.stringify(
+    manifest,
+    null,
+    2
+  )
 );
+
+
+// ======================================================
+// GENERATION DES ICONES PWA
+// ======================================================
 
 function crc32(buf) {
   let c = 0xffffffff;
@@ -79,47 +115,86 @@ function crc32(buf) {
     c ^= b;
 
     for (let k = 0; k < 8; k++) {
-      c = (c >>> 1) ^ (0xedb88320 & -(c & 1));
+      c =
+        (c >>> 1) ^
+        (0xedb88320 & -(c & 1));
     }
   }
 
   return (c ^ 0xffffffff) >>> 0;
 }
 
+
 function chunk(type, data) {
   const t = Buffer.from(type);
-  const out = Buffer.alloc(12 + data.length);
-
-  out.writeUInt32BE(data.length, 0);
-  t.copy(out, 4);
-  data.copy(out, 8);
+  const out = Buffer.alloc(
+    12 + data.length
+  );
 
   out.writeUInt32BE(
-    crc32(Buffer.concat([t, data])),
+    data.length,
+    0
+  );
+
+  t.copy(
+    out,
+    4
+  );
+
+  data.copy(
+    out,
+    8
+  );
+
+  out.writeUInt32BE(
+    crc32(
+      Buffer.concat([
+        t,
+        data
+      ])
+    ),
     8 + data.length
   );
 
   return out;
 }
 
-function makeIcon(size) {
-  const raw = Buffer.alloc((size * 4 + 1) * size);
 
-  const pad = Math.floor(size * 0.20);
-  const thick = Math.max(8, Math.floor(size * 0.08));
-  const top = Math.floor(size * 0.25);
-  const bottom = Math.floor(size * 0.75);
+function makeIcon(size) {
+  const raw = Buffer.alloc(
+    (size * 4 + 1) * size
+  );
+
+  const pad =
+    Math.floor(size * 0.20);
+
+  const thick =
+    Math.max(
+      8,
+      Math.floor(size * 0.08)
+    );
+
+  const top =
+    Math.floor(size * 0.25);
+
+  const bottom =
+    Math.floor(size * 0.75);
+
 
   for (let y = 0; y < size; y++) {
-    const row = y * (size * 4 + 1);
+    const row =
+      y * (size * 4 + 1);
+
     raw[row] = 0;
 
     for (let x = 0; x < size; x++) {
-      const i = row + 1 + x * 4;
+      const i =
+        row + 1 + x * 4;
 
       let r = 17;
       let g = 24;
       let b = 39;
+
 
       const left =
         x >= pad &&
@@ -127,34 +202,46 @@ function makeIcon(size) {
         y >= top &&
         y <= bottom;
 
+
       const right =
         x >= size - pad - thick &&
         x < size - pad &&
         y >= top &&
         y <= bottom;
 
+
       const d1 =
         Math.abs(
           (x - pad) -
           (y - top) * 0.55
-        ) < thick * 0.7;
+        ) <
+        thick * 0.7;
+
 
       const d2 =
         Math.abs(
           (size - pad - x) -
           (y - top) * 0.55
-        ) < thick * 0.7;
+        ) <
+        thick * 0.7;
+
 
       const mid =
         y >= top &&
         y <= Math.floor(size * 0.58) &&
         (d1 || d2);
 
-      if (left || right || mid) {
+
+      if (
+        left ||
+        right ||
+        mid
+      ) {
         r = 255;
         g = 255;
         b = 255;
       }
+
 
       raw[i] = r;
       raw[i + 1] = g;
@@ -163,143 +250,250 @@ function makeIcon(size) {
     }
   }
 
-  const ihdr = Buffer.alloc(13);
 
-  ihdr.writeUInt32BE(size, 0);
-  ihdr.writeUInt32BE(size, 4);
+  const ihdr =
+    Buffer.alloc(13);
+
+  ihdr.writeUInt32BE(
+    size,
+    0
+  );
+
+  ihdr.writeUInt32BE(
+    size,
+    4
+  );
 
   ihdr[8] = 8;
   ihdr[9] = 6;
 
+
   return Buffer.concat([
     Buffer.from([
-      137, 80, 78, 71,
-      13, 10, 26, 10
+      137,
+      80,
+      78,
+      71,
+      13,
+      10,
+      26,
+      10
     ]),
-    chunk('IHDR', ihdr),
+
+    chunk(
+      'IHDR',
+      ihdr
+    ),
+
     chunk(
       'IDAT',
-      zlib.deflateSync(raw, { level: 9 })
+      zlib.deflateSync(
+        raw,
+        {
+          level: 9
+        }
+      )
     ),
-    chunk('IEND', Buffer.alloc(0))
+
+    chunk(
+      'IEND',
+      Buffer.alloc(0)
+    )
   ]);
 }
+
 
 fs.writeFileSync(
   'public/icon-192.png',
   makeIcon(192)
 );
 
+
 fs.writeFileSync(
   'public/icon-512.png',
   makeIcon(512)
 );
 
+
+// ======================================================
+// VERSION DU BUILD
+// ======================================================
+
 const version = String(
   process.env.VERCEL_GIT_COMMIT_SHA ||
   process.env.VERCEL_DEPLOYMENT_ID ||
   Date.now()
-).slice(0, 20);
+).slice(
+  0,
+  20
+);
 
-const adminUi =
-  'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-user-admin-ui?v=20260914';
 
-const assetUi =
-  'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-asset-ui?v=20260914p5';
+// ======================================================
+// SERVICE WORKER
+// ======================================================
 
-const woUi =
-  'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-wo-ui?v=20260914p6';
+// Modules externes Supabase
+const remoteModules =
+  modules.filter(
+    src =>
+      /^https:\/\//.test(src)
+  );
 
-const dashboardUi =
-  'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-dashboard-ui?v=20260914p7';
 
-const searchUi =
-  'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-search-ui?v=20260914p8';
-
-const stockUi =
-  'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-stock-ui?v=20260914p9';
-
-const sw = `
-const V=${JSON.stringify(version)};
-const P='mainteno-next-';
-const A=P+'app-'+V;
-const R=P+'runtime-'+V;
-
-const U=${JSON.stringify(adminUi)};
-const X=${JSON.stringify(assetUi)};
-const W=${JSON.stringify(woUi)};
-const D=${JSON.stringify(dashboardUi)};
-const G=${JSON.stringify(searchUi)};
-const H=${JSON.stringify(stockUi)};
-
-const SHELL=[
+// Tous les fichiers importants de l'application
+const shellFiles = [
   '/',
   '/index.html',
-  '/ux-forms.js?v=20260914',
   '/manifest.webmanifest',
   '/icon-192.png',
   '/icon-512.png',
-  U,
-  X,
-  W,
-  D,
-  G,
-  H
+  ...modules
 ];
 
-self.addEventListener('install',e=>
-  e.waitUntil((async()=>{
 
-    const c=await caches.open(A);
+const sw = `
 
-    await Promise.allSettled(
-      SHELL.map(async u=>{
-        try{
-          const r=await fetch(u,{cache:'reload'});
+const V=${JSON.stringify(version)};
 
-          if(r.ok || r.type==='opaque'){
-            await c.put(u,r.clone());
+const P='mainteno-next-';
+
+const A=
+  P+'app-'+V;
+
+const R=
+  P+'runtime-'+V;
+
+
+// Modules distants
+const REMOTE=
+  ${JSON.stringify(remoteModules)};
+
+
+// Fichiers critiques
+const SHELL=
+  ${JSON.stringify(shellFiles)};
+
+
+// ======================================================
+// INSTALLATION
+// ======================================================
+
+self.addEventListener(
+  'install',
+  e =>
+
+    e.waitUntil(
+      (async () => {
+
+        const c =
+          await caches.open(A);
+
+
+        await Promise.allSettled(
+
+          SHELL.map(
+            async u => {
+
+              try {
+
+                const r =
+                  await fetch(
+                    u,
+                    {
+                      cache: 'reload'
+                    }
+                  );
+
+
+                if (
+                  r.ok ||
+                  r.type === 'opaque'
+                ) {
+
+                  await c.put(
+                    u,
+                    r.clone()
+                  );
+
+                }
+
+              } catch {}
+
+            }
+          )
+
+        );
+
+
+        await self.skipWaiting();
+
+      })()
+    )
+
+);
+
+
+// ======================================================
+// ACTIVATION
+// ======================================================
+
+self.addEventListener(
+  'activate',
+  e =>
+
+    e.waitUntil(
+      (async () => {
+
+        for (
+          const k
+          of await caches.keys()
+        ) {
+
+          if (
+            k.startsWith(P) &&
+            k !== A &&
+            k !== R
+          ) {
+
+            await caches.delete(k);
+
           }
-        }catch{}
-      })
-    );
 
-    await self.skipWaiting();
+        }
 
-  })())
+
+        await self.clients.claim();
+
+      })()
+    )
+
 );
 
-self.addEventListener('activate',e=>
-  e.waitUntil((async()=>{
 
-    for(const k of await caches.keys()){
+// ======================================================
+// NAVIGATION OFFLINE
+// ======================================================
 
-      if(
-        k.startsWith(P) &&
-        k!==A &&
-        k!==R
-      ){
-        await caches.delete(k);
-      }
+async function nav(req) {
 
-    }
+  const c =
+    await caches.open(A);
 
-    await self.clients.claim();
 
-  })())
-);
+  try {
 
-async function nav(req){
+    const r =
+      await fetch(req);
 
-  const c=await caches.open(A);
 
-  try{
+    if (r.ok) {
 
-    const r=await fetch(req);
+      await c.put(
+        '/',
+        r.clone()
+      );
 
-    if(r.ok){
-
-      await c.put('/',r.clone());
 
       await c.put(
         '/index.html',
@@ -308,111 +502,222 @@ async function nav(req){
 
     }
 
+
     return r;
 
-  }catch{
+  } catch {
+
 
     return (
-      await c.match('/index.html') ||
-      await c.match('/') ||
+
+      await c.match(
+        '/index.html'
+      ) ||
+
+      await c.match(
+        '/'
+      ) ||
+
       new Response(
+
         '<h1>Mainteno hors ligne</h1><p>Ouvre une fois l’application avec Internet pour activer le mode hors ligne.</p>',
+
         {
-          headers:{
+          headers: {
             'Content-Type':
-            'text/html;charset=utf-8'
+              'text/html;charset=utf-8'
           }
         }
+
       )
+
     );
 
   }
+
 }
 
-async function swr(req,name){
 
-  const c=await caches.open(name);
+// ======================================================
+// STALE WHILE REVALIDATE
+// ======================================================
 
-  const old=await c.match(
-    req,
-    {ignoreVary:true}
-  );
+async function swr(
+  req,
+  name
+) {
 
-  const net=fetch(req)
-    .then(async r=>{
+  const c =
+    await caches.open(name);
 
-      if(r.ok || r.type==='opaque'){
-        await c.put(
-          req,
-          r.clone()
-        );
+
+  const old =
+    await c.match(
+      req,
+      {
+        ignoreVary: true
       }
+    );
 
-      return r;
 
-    })
-    .catch(()=>null);
+  const net =
+    fetch(req)
+
+      .then(
+        async r => {
+
+          if (
+            r.ok ||
+            r.type === 'opaque'
+          ) {
+
+            await c.put(
+              req,
+              r.clone()
+            );
+
+          }
+
+
+          return r;
+
+        }
+      )
+
+      .catch(
+        () => null
+      );
+
 
   return (
     old ||
     await net ||
     new Response(
       '',
-      {status:503}
+      {
+        status: 503
+      }
     )
   );
-}
-
-self.addEventListener('fetch',e=>{
-
-  const q=e.request;
-
-  if(q.method!=='GET'){
-    return;
-  }
-
-  const u=new URL(q.url);
-
-  if(
-    q.mode==='navigate' &&
-    u.origin===location.origin
-  ){
-    return e.respondWith(
-      nav(q)
-    );
-  }
-
-if(u.href===U || u.href===X || u.href===W || u.href===D || u.href===G || u.href===H){
-
-  return e.respondWith(
-    swr(q,A)
-  );
 
 }
-  if(u.origin!==location.origin){
-    return;
-  }
 
-  if(
-    ['script','style','image','manifest']
-      .includes(q.destination) ||
-    u.pathname==='/ux-forms.js' ||
-    u.pathname==='/manifest.webmanifest'
-  ){
-    e.respondWith(
-      swr(q,R)
-    );
-  }
 
-});
+// ======================================================
+// FETCH
+// ======================================================
+
+self.addEventListener(
+  'fetch',
+  e => {
+
+    const q =
+      e.request;
+
+
+    if (
+      q.method !== 'GET'
+    ) {
+
+      return;
+
+    }
+
+
+    const u =
+      new URL(q.url);
+
+
+    // Navigation HTML
+    if (
+      q.mode === 'navigate' &&
+      u.origin === location.origin
+    ) {
+
+      return e.respondWith(
+        nav(q)
+      );
+
+    }
+
+
+    // Modules Supabase distants
+    if (
+      REMOTE.includes(
+        u.href
+      )
+    ) {
+
+      return e.respondWith(
+        swr(
+          q,
+          A
+        )
+      );
+
+    }
+
+
+    // On ne gère pas les autres domaines
+    if (
+      u.origin !==
+      location.origin
+    ) {
+
+      return;
+
+    }
+
+
+    // Assets locaux
+    if (
+
+      [
+        'script',
+        'style',
+        'image',
+        'manifest'
+      ].includes(
+        q.destination
+      )
+
+      ||
+
+      u.pathname ===
+        '/ux-forms.js'
+
+      ||
+
+      u.pathname ===
+        '/manifest.webmanifest'
+
+    ) {
+
+      e.respondWith(
+        swr(
+          q,
+          R
+        )
+      );
+
+    }
+
+  }
+);
+
 `;
 
+
+// Génération du service worker
 fs.writeFileSync(
   'public/sw.js',
   sw
 );
 
+
 console.log(
   'Mainteno Next PWA build:',
-  version
+  version,
+  'modules:',
+  modules.length
 );
