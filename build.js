@@ -7,6 +7,7 @@ let html = fs.readFileSync('index.html', 'utf8');
 const scripts = [
   '<script src="/ux-forms.js?v=20260914"></script>',
   '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-user-admin-ui?v=20260914"></script>'
+  '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-asset-ui?v=20260914p5"></script>'
 ];
 
 for (const tag of scripts) {
@@ -199,6 +200,9 @@ const version = String(
 const adminUi =
   'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-user-admin-ui?v=20260914';
 
+const assetUi =
+  'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-asset-ui?v=20260914p5';
+
 const sw = `
 const V=${JSON.stringify(version)};
 const P='mainteno-next-';
@@ -206,6 +210,7 @@ const A=P+'app-'+V;
 const R=P+'runtime-'+V;
 
 const U=${JSON.stringify(adminUi)};
+const X=${JSON.stringify(assetUi)};
 
 const SHELL=[
   '/',
@@ -214,7 +219,8 @@ const SHELL=[
   '/manifest.webmanifest',
   '/icon-192.png',
   '/icon-512.png',
-  U
+  U,
+  X
 ];
 
 self.addEventListener('install',e=>
@@ -352,14 +358,13 @@ self.addEventListener('fetch',e=>{
     );
   }
 
-  if(u.href===U){
+ if(u.href===U || u.href===X){
 
-    return e.respondWith(
-      swr(q,A)
-    );
+  return e.respondWith(
+    swr(q,A)
+  );
 
-  }
-
+}
   if(u.origin!==location.origin){
     return;
   }
