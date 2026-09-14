@@ -7,17 +7,18 @@ let html = fs.readFileSync('index.html', 'utf8');
 // Local application modules, loaded in this exact order by index.html.
 const localModules = [
   '/js/core.js?v=20260914p11',
-  '/js/router.js?v=20260914p11',
+  '/js/router.js?v=20260914p12',
   '/js/reports.js?v=20260914p11',
   '/js/dashboard-admin.js?v=20260914p11',
   '/js/assets.js?v=20260914p11',
-  '/js/workorders.js?v=20260914p11',
+  '/js/workorders.js?v=20260914p12',
+  '/js/technician.js?v=20260914p12',
   '/js/planning.js?v=20260914p11',
   '/js/requests.js?v=20260914p11',
   '/js/inventory.js?v=20260914p11',
   '/js/offline.js?v=20260914p11',
-  '/js/events.js?v=20260914p11',
-  '/app.js?v=20260914p11'
+  '/js/events.js?v=20260914p12',
+  '/app.js?v=20260914p12'
 ];
 
 // Registre central des modules Mainteno.
@@ -380,7 +381,7 @@ const shellFiles = [
   '/manifest.webmanifest',
   '/icon-192.png',
   '/icon-512.png',
-  '/app.css?v=20260914p10',
+  '/app.css?v=20260914p12',
   ...localModules,
   ...modules
 ];

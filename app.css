@@ -517,3 +517,252 @@ button,input,select,textarea{font:inherit}
     color:#333!important
   }
 }
+
+
+/* ===== Technician mobile UX ===== */
+.techHero{
+  background:linear-gradient(135deg,#111827,#1f2937);
+  color:#fff;
+  border:0;
+  padding:18px
+}
+
+.techHero .sub,
+.techHero .mut{color:#cbd5e1}
+
+.techHero h1{font-size:24px}
+
+.techStatus{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:12px
+}
+
+.techStatus>span{
+  background:#ffffff18;
+  border:1px solid #ffffff24;
+  border-radius:999px;
+  padding:6px 9px;
+  font-size:11px;
+  font-weight:800
+}
+
+.techActions{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:9px;
+  margin:12px 0
+}
+
+.techAction{
+  min-height:76px;
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:14px;
+  padding:10px;
+  text-align:left;
+  font-weight:850;
+  cursor:pointer
+}
+
+.techAction b{
+  display:block;
+  font-size:19px;
+  margin-bottom:5px
+}
+
+.techAction small{
+  display:block;
+  margin-top:3px;
+  color:var(--mut);
+  font-weight:700
+}
+
+.techStats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:9px;
+  margin:12px 0
+}
+
+.techStat{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:13px;
+  padding:12px
+}
+
+.techStat b{
+  display:block;
+  font-size:23px
+}
+
+.techStat span{
+  font-size:10px;
+  font-weight:850;
+  color:var(--mut);
+  text-transform:uppercase
+}
+
+.techStat.hot{
+  border-color:#fecaca;
+  background:#fff7f7
+}
+
+.techStat.hot b{color:#b91c1c}
+
+.techStat.warnStat{
+  border-color:#fed7aa;
+  background:#fffaf5
+}
+
+.techStat.warnStat b{color:#c2410c}
+
+.techSectionTitle{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin:17px 0 8px
+}
+
+.techSectionTitle h2{
+  font-size:16px;
+  margin:0
+}
+
+.techWoCard{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:13px;
+  margin-bottom:9px;
+  cursor:pointer;
+  box-shadow:0 1px 2px #00000008
+}
+
+.techWoCard:active{transform:scale(.995)}
+
+.techWoTop{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px
+}
+
+.techWoTitle{
+  font-weight:900;
+  line-height:1.25
+}
+
+.techWoMeta{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-top:8px
+}
+
+.techWoMeta span{
+  font-size:10px;
+  background:#f3f4f6;
+  border-radius:999px;
+  padding:4px 7px;
+  font-weight:750
+}
+
+.techDue{
+  font-size:11px;
+  font-weight:850;
+  margin-top:8px
+}
+
+.techDue.overdue{color:#b91c1c}
+.techDue.soon{color:#c2410c}
+
+.techEmpty{
+  text-align:center;
+  padding:24px 12px;
+  color:var(--mut)
+}
+
+.techActive{
+  border:2px solid #86efac;
+  background:#f0fdf4
+}
+
+.techActive .techWoTitle{color:#166534}
+
+@media(max-width:900px){
+  .top{
+    height:56px;
+    padding:0 12px
+  }
+
+  .brand{font-size:17px}
+
+  .content{
+    padding:10px 10px 84px
+  }
+
+  .card{
+    border-radius:13px;
+    padding:13px
+  }
+
+  .btn{
+    min-height:44px
+  }
+
+  .mobileNav{
+    padding:5px 5px max(5px,env(safe-area-inset-bottom));
+    box-shadow:0 -4px 18px #0000000a
+  }
+
+  .mobileNav button{
+    min-height:51px;
+    font-size:9px
+  }
+
+  .techAction{min-height:72px}
+
+  .techWoCard{padding:13px}
+
+  .techWoActionBar{
+    position:sticky;
+    top:62px;
+    z-index:20;
+    background:#fff;
+    padding:8px;
+    margin-left:-8px;
+    margin-right:-8px;
+    border-radius:12px;
+    box-shadow:0 5px 16px #00000010
+  }
+}
+
+@media(max-width:560px){
+  .techActions{
+    grid-template-columns:1fr 1fr
+  }
+
+  .techStats{
+    grid-template-columns:repeat(3,1fr)
+  }
+
+  .techStat{
+    padding:10px 8px
+  }
+
+  .techStat b{
+    font-size:20px
+  }
+
+  .techHero{
+    padding:15px
+  }
+
+  .techHero h1{
+    font-size:21px
+  }
+}
