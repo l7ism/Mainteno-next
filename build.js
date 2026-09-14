@@ -67,6 +67,11 @@ fs.copyFileSync(
   'public/ux-forms.js'
 );
 
+fs.copyFileSync(
+  'app.css',
+  'public/app.css'
+);
+
 const manifest = {
   id: '/',
   name: 'Mainteno Next',
@@ -348,6 +353,7 @@ const shellFiles = [
   '/manifest.webmanifest',
   '/icon-192.png',
   '/icon-512.png',
+  '/app.css?v=20260914p10',
   ...modules
 ];
 
