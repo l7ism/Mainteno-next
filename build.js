@@ -7,7 +7,8 @@ let html = fs.readFileSync('index.html', 'utf8');
 const scripts = [
   '<script src="/ux-forms.js?v=20260914"></script>',
   '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-user-admin-ui?v=20260914"></script>',
-  '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-asset-ui?v=20260914p5"></script>'
+  '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-asset-ui?v=20260914p5"></script>',
+  '<script src="https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-wo-ui?v=20260914p6"></script>'
 ];
 
 for (const tag of scripts) {
@@ -203,6 +204,9 @@ const adminUi =
 const assetUi =
   'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-asset-ui?v=20260914p5';
 
+const woUi =
+  'https://vlxpqsmmzhnhkceqcnes.supabase.co/functions/v1/mainteno-wo-ui?v=20260914p6';
+
 const sw = `
 const V=${JSON.stringify(version)};
 const P='mainteno-next-';
@@ -211,6 +215,7 @@ const R=P+'runtime-'+V;
 
 const U=${JSON.stringify(adminUi)};
 const X=${JSON.stringify(assetUi)};
+const W=${JSON.stringify(woUi)};
 
 const SHELL=[
   '/',
@@ -220,7 +225,8 @@ const SHELL=[
   '/icon-192.png',
   '/icon-512.png',
   U,
-  X
+  X,
+  W
 ];
 
 self.addEventListener('install',e=>
@@ -358,7 +364,7 @@ self.addEventListener('fetch',e=>{
     );
   }
 
- if(u.href===U || u.href===X){
+if(u.href===U || u.href===X || u.href===W){
 
   return e.respondWith(
     swr(q,A)
