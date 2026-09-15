@@ -47,6 +47,19 @@
     return String(path||'').split('/').map(encodeURIComponent).join('/');
   }
 
+  function resolveSignedStorageUrl(u){
+    if(!u)throw Error('URL photo indisponible');
+    if(/^https?:\/\//i.test(u))return u;
+
+    // Raw Supabase Storage signing endpoint returns a path such as:
+    // /object/sign/<bucket>/<path>?token=...
+    // It must be resolved against /storage/v1, not against the project root.
+    if(u.startsWith('/storage/v1/'))return SB+u;
+    if(u.startsWith('/object/'))return SB+'/storage/v1'+u;
+    if(u.startsWith('object/'))return SB+'/storage/v1/'+u;
+    return SB+'/storage/v1/'+u.replace(/^\/+/,'');
+  }
+
   async function signedMediaUrl(att){
     const path=encodeStoragePath(att.storage_path);
     const r=await fetch(`${SB}/storage/v1/object/sign/mainteno-next-media/${path}`,{
@@ -61,9 +74,8 @@
     let j=null;
     try{j=await r.json()}catch{}
     if(!r.ok)throw Error(j?.message||j?.error||'Impossible de charger la photo');
-    let u=j?.signedURL||j?.signedUrl||j?.signed_url;
-    if(!u)throw Error('URL photo indisponible');
-    return /^https?:\/\//i.test(u)?u:SB+(u.startsWith('/')?'':'/')+u;
+    const u=j?.signedURL||j?.signedUrl||j?.signed_url;
+    return resolveSignedStorageUrl(u);
   }
 
   function mediaItems(atts){
