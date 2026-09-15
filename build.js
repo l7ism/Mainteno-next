@@ -16,6 +16,7 @@ const localModules = [
   '/js/planning.js?v=20260914p11',
   '/js/requests.js?v=20260914p11',
   '/js/inventory.js?v=20260914p11',
+  '/js/reservations.js?v=20260915p14',
   '/js/offline.js?v=20260914p11',
   '/js/events.js?v=20260914p12',
   '/app.js?v=20260914p12'
@@ -383,6 +384,7 @@ const shellFiles = [
   '/icon-512.png',
   '/app.css?v=20260914p12',
   ...localModules,
+  '/js/reliability.js?v=20260914p13',
   ...modules
 ];
 
