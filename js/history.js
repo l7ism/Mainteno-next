@@ -1,7 +1,7 @@
-// Mainteno Next — Historique V3: monthly snapshots, trends, comparisons and drift alerts.
+// Mainteno Next — Historique V4: monthly snapshots, trends, comparisons, drift alerts and exports.
 (function(){
-  if(window.__maintenoHistoryV3Loaded)return;
-  window.__maintenoHistoryV3Loaded=true;
+  if(window.__maintenoHistoryV4Loaded)return;
+  window.__maintenoHistoryV4Loaded=true;
 
   const H={
     months:12,
@@ -476,6 +476,132 @@
       </div>`;
   }
 
+
+  function exportFileSlug(v){
+    return String(v||'historique')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-zA-Z0-9_-]+/g,'_')
+      .replace(/^_+|_+$/g,'')
+      .toLowerCase()||'historique';
+  }
+
+  function historyExportContext(){
+    if(H.tab==='machines'){
+      const rows=chron(H.data.machines.filter(r=>r.asset_id===H.assetId));
+      const cur=rows[rows.length-1];
+      const label=cur?((cur.asset_code?cur.asset_code+' · ':'')+cur.asset_name):'Machine';
+      return {
+        title:`Historique machine — ${label}`,
+        file:`mainteno_historique_machine_${exportFileSlug(label)}_${H.months}m`,
+        rows:rows.map(r=>({
+          'Mois':monthLabel(r.month_start),
+          'État snapshot':r.snapshot_status==='closed'?'Clôturé':'Provisoire',
+          'Machine':(r.asset_code?r.asset_code+' · ':'')+(r.asset_name||''),
+          'État machine':r.asset_status||'',
+          'OT terminés':r.work_orders_completed??0,
+          'Pannes correctives':r.corrective_failures??0,
+          'MTTR h':r.mttr_hours??'',
+          'Downtime h':r.downtime_hours??'',
+          'First Time Fix %':r.first_time_fix_pct??'',
+          'Rework %':r.rework_pct??'',
+          'Documentation %':r.documentation_pct??'',
+          'Coût pièces MAD':r.parts_cost_mad??'',
+          'Heures intervention':r.total_intervention_hours??''
+        }))
+      };
+    }
+
+    if(H.tab==='technicians'){
+      const rows=chron(H.data.technicians.filter(r=>r.technician_id===H.technicianId));
+      const cur=rows[rows.length-1];
+      const label=cur?.technician_name||'Technicien';
+      return {
+        title:`Historique technicien — ${label}`,
+        file:`mainteno_historique_technicien_${exportFileSlug(label)}_${H.months}m`,
+        rows:rows.map(r=>({
+          'Mois':monthLabel(r.month_start),
+          'État snapshot':r.snapshot_status==='closed'?'Clôturé':'Provisoire',
+          'Technicien':r.technician_name||'',
+          'Rôle':r.technician_role||'',
+          'Département':r.department||'',
+          'OT affectés':r.assigned_work_orders??0,
+          'OT terminés':r.completed_work_orders??0,
+          'OT ouverts':r.open_work_orders??0,
+          'Correctifs terminés':r.corrective_completed??0,
+          'Préventifs terminés':r.preventive_completed??0,
+          'MTTR h':r.mttr_hours??'',
+          'Réponse moyenne min':r.avg_response_minutes??'',
+          'First Time Fix %':r.first_time_fix_pct??'',
+          'Rework %':r.rework_pct??'',
+          'Documentation %':r.documentation_pct??'',
+          'Heures intervention':r.total_intervention_hours??'',
+          'Échantillon exploitable':r.comparison_ready?'Oui':'Non'
+        }))
+      };
+    }
+
+    if(H.tab==='stock'){
+      const rows=chron(H.data.stock.filter(r=>r.part_id===H.partId));
+      const cur=rows[rows.length-1];
+      const label=cur?((cur.part_reference?cur.part_reference+' · ':'')+cur.part_name):'Pièce';
+      return {
+        title:`Historique stock — ${label}`,
+        file:`mainteno_historique_stock_${exportFileSlug(label)}_${H.months}m`,
+        rows:rows.map(r=>({
+          'Mois':monthLabel(r.month_start),
+          'État snapshot':r.snapshot_status==='closed'?'Clôturé':'Provisoire',
+          'Référence':r.part_reference||'',
+          'Pièce':r.part_name||'',
+          'Stock physique':r.quantity_on_hand??0,
+          'Réservé':r.quantity_reserved??0,
+          'Disponible':r.quantity_available??0,
+          'Minimum':r.minimum_stock??0,
+          'Coût unitaire MAD':r.unit_cost_mad??'',
+          'Valeur stock MAD':r.inventory_value_mad??''
+        }))
+      };
+    }
+
+    const rows=chron(H.data.maintenance);
+    return {
+      title:`Historique maintenance — ${H.months} mois`,
+      file:`mainteno_historique_maintenance_${H.months}m`,
+      rows:rows.map(r=>({
+        'Mois':monthLabel(r.month_start),
+        'État snapshot':r.snapshot_status==='closed'?'Clôturé':'Provisoire',
+        'OT créés':r.work_orders_created??0,
+        'OT terminés':r.work_orders_completed??0,
+        'Backlog':r.open_backlog??0,
+        'Correctifs terminés':r.corrective_completed??0,
+        'Préventifs terminés':r.preventive_completed??0,
+        'MTTR h':r.avg_mttr_hours??'',
+        'Downtime h':r.total_downtime_hours??'',
+        'First Time Fix %':r.first_time_fix_pct??'',
+        'Documentation %':r.documentation_pct??'',
+        'Coût pièces MAD':r.parts_cost_mad??'',
+        'Stock bas':r.low_stock_parts??0,
+        'Version calcul':r.calculation_version||''
+      }))
+    };
+  }
+
+  function exportHistory(asPdf=false){
+    if(!H.loaded){
+      toast('Charge d’abord l’historique',1);
+      return;
+    }
+    const x=historyExportContext();
+    if(!x.rows.length){
+      toast('Aucune donnée historique à exporter',1);
+      return;
+    }
+    if(asPdf){
+      printReport(x.title,x.rows);
+    }else{
+      downloadCsv(x.file+'.csv',x.rows);
+    }
+  }
+
   function historyBody(){
     if(H.loading&&!H.loaded)return '<div class="card"><div class="mut">Chargement de l’historique…</div></div>';
     if(H.error)return `<div class="card"><div class="notice">${e(H.error)}</div><button class="btn primary" data-history-retry style="margin-top:10px">Réessayer</button></div>`;
@@ -492,7 +618,11 @@
     shell(`
       <div class="row mobileStack">
         <div><h1 class="title">Historique</h1><p class="sub">Tendances mensuelles · Maintenance, machines, techniciens et stock</p></div>
-        <div class="stack"><button class="btn primary" data-history-refresh ${H.loading?'disabled':''}>↻ Actualiser</button></div>
+        <div class="stack">
+          <button class="btn" data-history-export ${H.loading||!H.loaded?'disabled':''}>Excel / CSV</button>
+          <button class="btn" data-history-pdf ${H.loading||!H.loaded?'disabled':''}>PDF</button>
+          <button class="btn primary" data-history-refresh ${H.loading?'disabled':''}>↻ Actualiser</button>
+        </div>
       </div>
       <div class="notice">Le mois en cours reste <b>provisoire</b>. Les alertes de dérive utilisent les mois clôturés et vérifient la taille de l’échantillon lorsque c’est nécessaire.</div>
       <div class="row mobileStack" style="margin-top:12px">
@@ -530,6 +660,8 @@
   document.addEventListener('click',ev=>{
     const tab=ev.target.closest('[data-history-tab]');
     if(tab){H.tab=tab.dataset.historyTab;return render()}
+    if(ev.target.closest('[data-history-export]'))return exportHistory(false);
+    if(ev.target.closest('[data-history-pdf]'))return exportHistory(true);
     if(ev.target.closest('[data-history-refresh]'))return loadHistory(true);
     if(ev.target.closest('[data-history-retry]'))return loadHistory(false);
   });
